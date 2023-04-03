@@ -4,69 +4,65 @@ integration:
   trigger-interfaces:
     trigger-interface-1:
       triggers:
-        healthzTest2:
+        healthzTest:
           assembly:
-            $ref: '#/integration/assemblies/assembly-2'
+            $ref: '#/integration/assemblies/assembly-1'
           input-context:
-            data: test2
+            data: test
           output-context:
-            data: test2
+            data: test
       options:
         resources:
-          - business-object: test2
+          - business-object: test
             model:
-              $ref: '#/models/test2'
+              $ref: '#/models/test'
             triggers:
-              healthz: healthzTest2
+              healthz: healthzTest
       type: api-trigger
   action-interfaces: {}
   assemblies:
-    assembly-2:
+    assembly-1:
       assembly:
         execute:
           - response:
               name: response-1
               reply-maps:
-                - title: test2 successfully add custom operation
-                  status-code: 200
+                - title: test successfully add custom operation
+                  status-code: '200'
                   map:
-                    mappings:
-                      - a:
-                          template: This is test 1
                     $map: http://ibm.com/appconnect/map/v1
                     input:
-                      - variable: api
-                        $ref: '#/trigger/api/parameters'
                       - variable: flowDetails
                         $ref: '#/flowDetails'
-                  input: []
-  name: Test2
+                    mappings:
+                      - a:
+                          template: Test 1
+                  input:
+                    - variable: flowDetails
+                      $ref: '#/flowDetails'
+  name: test-1
 models:
-  test2:
-    name: test2
+  test:
+    name: test
     properties:
       a:
         required: false
         id: true
         type: string
-    plural: test2
+    plural: test
     description: ' '
     operations:
-      healthz: '#/integration/assemblies/assembly-2'
-    interactions: {}
+      healthz: '#/integration/assemblies/assembly-1'
     methods:
       healthz:
         name: healthz
         display:
-          name: test2
+          name: test
         accessType: WRITE
-        accepts:
-          - type: string
-            http:
-              source: query
+        accepts: []
         returns:
           arg: data
-          type: test2
+          type: test
           root: true
         http:
           verb: GET
