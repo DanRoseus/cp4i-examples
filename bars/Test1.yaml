@@ -1,0 +1,113 @@
+$integration: http://ibm.com/appconnect/integration/v2/integrationFile
+integration:
+  type: api
+  trigger-interfaces:
+    trigger-interface-1:
+      triggers:
+        healthzTest1:
+          assembly:
+            $ref: '#/integration/assemblies/assembly-2'
+          input-context:
+            data: test1
+          output-context:
+            data: test1
+      options:
+        resources:
+          - business-object: test1
+            model:
+              $ref: '#/models/test1'
+            triggers:
+              healthz: healthzTest1
+      type: api-trigger
+  action-interfaces: {}
+  assemblies:
+    assembly-2:
+      assembly:
+        execute:
+          - response:
+              name: response-1
+              reply-maps:
+                - title: test1 successfully add custom operation
+                  status-code: 200
+                  map:
+                    mappings:
+                      - a:
+                          template: This is test 1
+                    $map: http://ibm.com/appconnect/map/v1
+                    input:
+                      - variable: api
+                        $ref: '#/trigger/api/parameters'
+                      - variable: flowDetails
+                        $ref: '#/flowDetails'
+                  input: []
+  name: Test1
+models:
+  test1:
+    name: test1
+    properties:
+      a:
+        required: false
+        id: true
+        type: string
+    plural: test1
+    description: ' '
+    operations:
+      healthz: '#/integration/assemblies/assembly-2'
+    interactions: {}
+    methods:
+      healthz:
+        name: healthz
+        display:
+          name: test1
+        accessType: WRITE
+        accepts:
+          - type: string
+            http:
+              source: query
+        returns:
+          arg: data
+          type: test1
+          root: true
+        http:
+          verb: GET
+          path: /healthz
+x-ibm-configuration:
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  cors:
+    enabled: true
+  assembly:
+    execute:
+      - invoke:
+          title: Invoke flow
+          version: 2.0.0
+          verb: keep
+          target-url: $(app-connect-designer-url)$(request.path)
+          follow-redirects: false
+          timeout: 60
+          parameter-control:
+            type: blacklist
+          header-control:
+            type: blacklist
+          inject-proxy-headers: true
+          username: $(app-connect-designer-username)
+          password: $(app-connect-designer-password)
+  properties:
+    app-connect-designer-url:
+      description: The URL of the App Connect Designer API endpoint.
+      encoded: false
+      value: >-
+        https://ace-designer-demo-designer-https-dan.apps.fermi-dan.cp.fyre.ibm.com
+    app-connect-designer-username:
+      description: >-
+        The username required for basic authentication to the App Connect
+        Designer API endpoint.
+      value: 8Qnu1lob
+    app-connect-designer-password:
+      description: >-
+        The password required for basic authentication to the App Connect
+        Designer API endpoint.
+      value: jvS6Q9CP7RKHiduMBqlh43DOxNeyW085
