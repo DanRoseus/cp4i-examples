@@ -1,0 +1,18 @@
+product: 1.0.0
+info:
+    title: Test-Product
+    name: test-product
+    version: '1.0'
+plans:
+    default-plan:
+      rate-limits:
+        default:
+          value: 100/1hour
+      title: Default Plan
+      description: Default Plan
+      approval: false
+apis:
+  test-1:
+    name: 'test-1:0.0.1'
+  test-2:
+    name: 'test-2:0.0.1'
