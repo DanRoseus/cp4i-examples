@@ -6,7 +6,8 @@
     "x-ibm-name": "test-1"
   },
   "schemes": [
-    "http", "https"
+    "http",
+    "https"
   ],
   "basePath": "/test-1/",
   "consumes": [
@@ -50,8 +51,7 @@
     "properties": {
       "target-url": {
         "value": "http://test-http-routes-noauth-http-dan.apps.fermi-dan.cp.fyre.ibm.com",
-        "description": "The URL of the IntegrationRuntime named [test-http-routes-noauth] in the [dan] namespace",
-        "encoded": false
+        "description": "The URL of the IntegrationRuntime named [test-http-routes-noauth] in the [dan] namespace"
       }
     },
     "assembly": {
@@ -59,7 +59,7 @@
         {
           "invoke": {
             "version": "2.3.0",
-            "target-url": "$(target-url)$(request.path)"
+            "target-url": "$(target-url)$(request.path)$(request.search)"
           }
         }
       ]

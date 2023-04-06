@@ -1,0 +1,53 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "test-2",
+        "version": "0.0.1"
+    },
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "basePath": "\/test-2\/",
+    "consumes": [
+        "application\/json"
+    ],
+    "produces": [
+        "application\/json"
+    ],
+    "paths": {
+        "/test/healthz": {
+            "get": {
+                "tags": [
+                    "test"
+                ],
+                "operationId": "test.healthz",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Request was successful",
+                        "schema": {
+                            "$ref": "#\/definitions\/test"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "test": {
+            "description": "",
+            "type": "object",
+            "properties": {
+                "a": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "host": "test-http-svc-noauth-ir-6b7647f8b9-qs2mf:7800",
+    "schemes": [
+        "http"
+    ]
+}

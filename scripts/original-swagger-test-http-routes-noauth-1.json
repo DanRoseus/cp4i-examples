@@ -1,0 +1,53 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "test-1",
+        "version": "0.0.1"
+    },
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "basePath": "\/test-1\/",
+    "consumes": [
+        "application\/json"
+    ],
+    "produces": [
+        "application\/json"
+    ],
+    "paths": {
+        "/test/healthz": {
+            "get": {
+                "tags": [
+                    "test"
+                ],
+                "operationId": "test.healthz",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Request was successful",
+                        "schema": {
+                            "$ref": "#\/definitions\/test"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "test": {
+            "description": "",
+            "type": "object",
+            "properties": {
+                "a": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "host": "test-http-routes-noauth-http-dan.apps.fermi-dan.cp.fyre.ibm.com",
+    "schemes": [
+        "http"
+    ]
+}

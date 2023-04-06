@@ -51,8 +51,15 @@
     "properties": {
       "target-url": {
         "value": "https://test-https-routes-auth-https-dan.apps.fermi-dan.cp.fyre.ibm.com",
-        "description": "The URL of the IntegrationRuntime named [test-https-routes-auth] in the [dan] namespace",
-        "encoded": false
+        "description": "The URL of the IntegrationRuntime named [test-https-routes-auth] in the [dan] namespace"
+      },
+      "username": {
+        "value": "aceuser",
+        "description": "The basic auth username for the IntegrationRuntime named [test-https-routes-auth] in the [dan] namespace"
+      },
+      "password": {
+        "value": "aHs2Zwi8XN1Modm4L3Uy57cEAKQTWG0V",
+        "description": "The basic auth password for the IntegrationRuntime named [test-https-routes-auth] in the [dan] namespace"
       }
     },
     "assembly": {
@@ -60,9 +67,9 @@
         {
           "invoke": {
             "version": "2.3.0",
-            "target-url": "$(target-url)$(request.path)",
-            "username": "aceuser",
-            "password": "aHs2Zwi8XN1Modm4L3Uy57cEAKQTWG0V"
+            "target-url": "$(target-url)$(request.path)$(request.search)",
+            "username": "$(username)",
+            "password": "$(password)"
           }
         }
       ]

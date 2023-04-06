@@ -51,8 +51,7 @@
     "properties": {
       "target-url": {
         "value": "http://test-http-svc-noauth-ir.dan.svc.cluster.local:7800",
-        "description": "The URL of the IntegrationRuntime named [test-http-svc-noauth] in the [dan] namespace",
-        "encoded": false
+        "description": "The URL of the IntegrationRuntime named [test-http-svc-noauth] in the [dan] namespace"
       }
     },
     "assembly": {
@@ -60,7 +59,7 @@
         {
           "invoke": {
             "version": "2.3.0",
-            "target-url": "$(target-url)$(request.path)"
+            "target-url": "$(target-url)$(request.path)$(request.search)"
           }
         }
       ]
