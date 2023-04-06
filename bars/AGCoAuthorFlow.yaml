@@ -1,0 +1,132 @@
+openapi: 3.0.0
+info:
+  version: 0.0.1
+  title: AGCoAuthorFlow
+  x-ibm-name: agcoauthorflow
+components:
+  schemas:
+    lead:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        address:
+          type: object
+          additionalProperties: false
+          properties:
+            address1:
+              type: string
+            address2:
+              type: string
+            city:
+              type: string
+            zipcode:
+              type: string
+            country:
+              type: string
+        email:
+          type: string
+        telephone:
+          type: string
+      additionalProperties: false
+      description: ' '
+  securitySchemes:
+    clientId:
+      in: header
+      name: X-IBM-Client-Id
+      type: apiKey
+paths:
+  /lead:
+    post:
+      tags:
+        - lead
+      summary: Create lead.
+      operationId: lead.create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/lead'
+        required: true
+      responses:
+        '201':
+          description: Request was successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/lead'
+  /lead/{id}:
+    get:
+      tags:
+        - lead
+      summary: Retrieve lead by ID
+      operationId: lead.findById
+      parameters:
+        - name: id
+          in: path
+          description: lead id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Request was successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/lead'
+x-ibm-configuration:
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  cors:
+    enabled: true
+  assembly:
+    execute:
+      - ratelimit:
+          version: 2.2.0
+          title: ratelimit
+          source: plan-default
+          description: This is the plan default rate limit
+      - invoke:
+          title: Invoke flow
+          version: 2.0.0
+          verb: keep
+          target-url: $(app-connect-designer-url)$(request.path)
+          follow-redirects: false
+          timeout: 60
+          parameter-control:
+            type: blacklist
+          header-control:
+            type: blacklist
+          inject-proxy-headers: true
+          username: $(app-connect-designer-username)
+          password: $(app-connect-designer-password)
+    catch: []
+  properties:
+    app-connect-designer-url:
+      description: The URL of the App Connect Designer API endpoint.
+      encoded: false
+      value: >-
+        https://ace-designer-demo-designer-https-cp4i.agdemo47-252622168ef3ca91d0666944581f016f-0000.us-south.containers.appdomain.cloud
+    app-connect-designer-username:
+      description: >-
+        The username required for basic authentication to the App Connect
+        Designer API endpoint.
+      value: kifr6RM9
+    app-connect-designer-password:
+      description: >-
+        The password required for basic authentication to the App Connect
+        Designer API endpoint.
+      value: F05gVZsjAl7Jh2UY8KEunSv136RofmXI
+security:
+  - clientId: []
+servers:
+  - url: >-
+      https://ademo-gw-gateway-cp4i.agdemo47-252622168ef3ca91d0666944581f016f-0000.us-south.containers.appdomain.cloud/ddd-demo-test/sandbox/AGCoAuthorFlow
