@@ -8,26 +8,64 @@
 # Contract with IBM Corp.
 #******************************************************************************
 
-DEBUG=true
+DEBUG=false
+NAMESPACE=dan
+RELEASE=ademo
+PROVIDER_ORG=main-demo
+CATALOG=main-demo-catalog
+PRODUCT=p1
+
+function usage() {
+  echo "Usage: $0 -n <namespace> -d"
+}
+
+while getopts "a:c:n:o:p:r:u:" opt; do
+  case ${opt} in
+  a)
+    APP="$OPTARG"
+    ;;
+  c)
+    CATALOG="$OPTARG"
+    ;;
+  n)
+    NAMESPACE="$OPTARG"
+    ;;
+  o)
+    PROVIDER_ORG="$OPTARG"
+    ;;
+  p)
+    PRODUCT="$OPTARG"
+    ;;
+  r)
+    RELEASE="$OPTARG"
+    ;;
+  u)
+    CONSUMER_ORG="$OPTARG"
+    ;;
+  \?)
+    usage
+    exit
+    ;;
+  esac
+done
+
+# If CONSUMER_ORG not set then default based on PROVIDER_ORG
+if [ -z "${CONSUMER_ORG}" ]; then CONSUMER_ORG=${PROVIDER_ORG}-corp; fi
+
+# TODO If APP not set then default based on PRODUCT
+if [ -z "${APP}" ]; then APP=${PRODUCT}-app; fi
+
 TICK="\xE2\x9C\x85"
 CROSS="\xE2\x9D\x8C"
-
-NAMESPACE=dan
-PRODUCT=swagger-test
-RELEASE=ademo
 
 client_id="599b7aef-8841-4ee2-88a0-84d49c4d6ff2"
 client_secret="0ea28423-e73b-47d4-b40e-ddb45c48bb0c"
 realm=provider/default-idp-2
 username=cp4i-admin
 password=engageibmAPI1
-ORG=main-demo
-CATALOG=main-demo-catalog
-C_ORG=${ORG}-corp
-APP=${PRODUCT}-app
 APP_TITLE=${APP}
 
-CORG_OWNER_USERNAME="${ORG}-corg-admin"
+CORG_OWNER_USERNAME="${PROVIDER_ORG}-corg-admin"
 CORG_OWNER_PASSWORD=engageibmAPI1
 
 PLATFORM_API_EP=$(oc get route -n $NAMESPACE ${RELEASE}-mgmt-platform-api -o jsonpath="{.spec.host}")
@@ -78,15 +116,15 @@ else
 fi
 
 # Get user registry url
-echo "[INFO] Getting configured catalog user registry url for ${ORG}-catalog..."
-RES=$(curl -kLsS https://$PLATFORM_API_EP/api/catalogs/$ORG/$CATALOG/configured-catalog-user-registries \
+echo "[INFO] Getting configured catalog user registry url for ${PROVIDER_ORG}-catalog..."
+RES=$(curl -kLsS https://$PLATFORM_API_EP/api/catalogs/${PROVIDER_ORG}/$CATALOG/configured-catalog-user-registries \
   -H "accept: application/json" \
   -H "authorization: Bearer ${TOKEN}")
 handle_res "${RES}"
 
 USER_REGISTRY_URL=$(echo "${OUTPUT}" | $JQ -r ".results[0].user_registry_url")
 $DEBUG && echo "[DEBUG] User registry url: ${USER_REGISTRY_URL}"
-echo -e "[INFO] ${TICK} Got configured catalog user registry url for ${ORG}-catalog"
+echo -e "[INFO] ${TICK} Got configured catalog user registry url for ${PROVIDER_ORG}-catalog"
 
 $DEBUG && echo "[DEBUG] username: $CORG_OWNER_USERNAME"
 $DEBUG && echo "[DEBUG] password: ${CORG_OWNER_PASSWORD}"
@@ -111,11 +149,11 @@ if [[ $OWNER_URL == "null" ]]; then
   # Get existing owner
   echo "[INFO] Getting existing consumer org owner..."
   # user registry naming convention: {catalog-name}-catalog
-  RES=$(curl -kLsS https://$PLATFORM_API_EP/api/user-registries/$ORG/${CATALOG}-catalog/users \
+  RES=$(curl -kLsS https://$PLATFORM_API_EP/api/user-registries/${PROVIDER_ORG}/${CATALOG}-catalog/users \
     -H "accept: application/json" \
     -H "authorization: Bearer ${TOKEN}")
   handle_res "${RES}"
-  OWNER_URL=$(echo "${OUTPUT}" | $JQ -r '.results[] | select(.username == "'${ORG}-corg-admin'").url')
+  OWNER_URL=$(echo "${OUTPUT}" | $JQ -r '.results[] | select(.username == "'${PROVIDER_ORG}-corg-admin'").url')
   $DEBUG && echo "[DEBUG] Owner url: ${OWNER_URL}"
   echo -e "[INFO] ${TICK} Got owner url"
 else
@@ -124,13 +162,13 @@ fi
 
 # Create consumer org
 echo "[INFO] Creating consumer org..."
-RES=$(curl -kLsS -X POST https://$PLATFORM_API_EP/api/catalogs/$ORG/$CATALOG/consumer-orgs \
+RES=$(curl -kLsS -X POST https://$PLATFORM_API_EP/api/catalogs/${PROVIDER_ORG}/$CATALOG/consumer-orgs \
   -H "accept: application/json" \
   -H "authorization: Bearer ${TOKEN}" \
   -H "content-type: application/json" \
   -d "{
-    \"title\": \"${C_ORG}\",
-    \"name\": \"${C_ORG}\",
+    \"title\": \"${CONSUMER_ORG}\",
+    \"name\": \"${CONSUMER_ORG}\",
     \"owner_url\": \"${OWNER_URL}\"
 }")
 handle_res "${RES}"
@@ -138,7 +176,7 @@ echo -e "[INFO] ${TICK} Consumer org created"
 
 # Create an app
 echo "[INFO] Creating application..."
-RES=$(curl -kLsS -X POST https://$PLATFORM_API_EP/api/consumer-orgs/$ORG/$CATALOG/$C_ORG/apps \
+RES=$(curl -kLsS -X POST https://$PLATFORM_API_EP/api/consumer-orgs/${PROVIDER_ORG}/$CATALOG/$CONSUMER_ORG/apps \
   -H "accept: application/json" \
   -H "authorization: Bearer ${TOKEN}" \
   -H "content-type: application/json" \
@@ -149,23 +187,23 @@ RES=$(curl -kLsS -X POST https://$PLATFORM_API_EP/api/consumer-orgs/$ORG/$CATALO
 handle_res "${RES}"
 echo -e "[INFO] ${TICK} Application created"
 
-echo "[INFO] Listing all products..."
-RES=$(curl -kLsS https://$PLATFORM_API_EP/api/catalogs/$ORG/$CATALOG/products \
-  -H "accept: application/json" \
-  -H "authorization: Bearer ${TOKEN}")
-handle_res "${RES}"
+# echo "[INFO] Listing all products..."
+# RES=$(curl -kLsS https://$PLATFORM_API_EP/api/catalogs/${PROVIDER_ORG}/$CATALOG/products \
+#   -H "accept: application/json" \
+#   -H "authorization: Bearer ${TOKEN}")
+# handle_res "${RES}"
 
-echo "[INFO] Listing all apis..."
-RES=$(curl -kLsS https://$PLATFORM_API_EP/api/catalogs/$ORG/$CATALOG/apis \
-  -H "accept: application/json" \
-  -H "authorization: Bearer ${TOKEN}")
-handle_res "${RES}"
+# echo "[INFO] Listing all apis..."
+# RES=$(curl -kLsS https://$PLATFORM_API_EP/api/catalogs/${PROVIDER_ORG}/$CATALOG/apis \
+#   -H "accept: application/json" \
+#   -H "authorization: Bearer ${TOKEN}")
+# handle_res "${RES}"
 
 
 
 # Get product url
 echo "[INFO] Getting url for product $PRODUCT..."
-RES=$(curl -kLsS https://$PLATFORM_API_EP/api/catalogs/$ORG/$CATALOG/products/$PRODUCT \
+RES=$(curl -kLsS https://$PLATFORM_API_EP/api/catalogs/${PROVIDER_ORG}/$CATALOG/products/$PRODUCT \
   -H "accept: application/json" \
   -H "authorization: Bearer ${TOKEN}")
 handle_res "${RES}"
@@ -175,7 +213,7 @@ echo -e "[INFO] ${TICK} Got product url"
 
 # Create an subscription
 echo "[INFO] Creating subscription..."
-RES=$(curl -kLsS -X POST https://$PLATFORM_API_EP/api/apps/$ORG/$CATALOG/$C_ORG/$APP/subscriptions \
+RES=$(curl -kLsS -X POST https://$PLATFORM_API_EP/api/apps/${PROVIDER_ORG}/$CATALOG/$CONSUMER_ORG/$APP/subscriptions \
   -H "accept: application/json" \
   -H "authorization: Bearer ${TOKEN}" \
   -H "content-type: application/json" \
@@ -187,7 +225,7 @@ handle_res "${RES}"
 echo -e "[INFO] ${TICK} Subscription created"
 
 echo "[INFO]  Getting client id..."
-RES=$(curl -kLsS https://$PLATFORM_API_EP/api/catalogs/$ORG/$CATALOG/credentials \
+RES=$(curl -kLsS https://$PLATFORM_API_EP/api/catalogs/${PROVIDER_ORG}/$CATALOG/credentials \
   -H "accept: application/json" \
   -H "authorization: Bearer ${TOKEN}")
 CLIENT_ID=$(echo "${RES}" | $JQ -r '.results[] | select(.name | contains("'${APP}'")).client_id')
@@ -195,6 +233,6 @@ $DEBUG && echo "[DEBUG] Client id: ${CLIENT_ID}"
 [[ $CLIENT_ID == "null" ]] && echo -e "[ERROR] ${CROSS} Couldn't get client id" && exit 1
 echo -e "[INFO]  ${TICK} Got client id"
 
-BASE_PATH="https://$(oc get route -n $NAMESPACE ${RELEASE}-gw-gateway -o jsonpath='{.spec.host}')/$ORG/$CATALOG"
+BASE_PATH="https://$(oc get route -n $NAMESPACE ${RELEASE}-gw-gateway -o jsonpath='{.spec.host}')/${PROVIDER_ORG}/$CATALOG"
 echo "[DEBUG] BASE_PATH: ${BASE_PATH}"
 
